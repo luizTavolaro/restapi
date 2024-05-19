@@ -29,6 +29,22 @@
             <tr> <th>ID</th> <th>Nome</th> <th>Desenvolvedor</th> <th>Downloads</th> <th>Time</th></tr>
             <tbody id="corpoTabelaAplicativos"> </tbody>
         </table>
+
+		<hr>
+
+		<p style="font-weight: bold;">Busca Pelo Id</p>
+
+		<input type="text" id="BuscarPeloIdInput" placeholder="ID Aplicativo">
+		<input type="button"  id="BuscarPeloIdBtn" value="Buscar Pelo Id" onclick="selecionaAplicativoPeloId()">
+		<div id="relatorioAplicativo"></div>
+
+		<hr>
+
+		<p style="font-weight: bold;">Busca Pelo Nome</p>
+        
+		<input type="text" id="BuscarPeloNomeInput" placeholder="Nome">
+		<input type="button"  id="BuscarPeloNomeBtn" value="Buscar Pelo Nome" onclick="selecionaAplicativoPeloNome()">
+		<div id="relatorioAplicativoNome"></div>
         
 	    <script>
 	        const corpoTabela = document.querySelector('#corpoTabelaAplicativos');
@@ -43,6 +59,9 @@
 	        const btnApagar = document.querySelector('#btnApagar');
 	        const btnCancelar = document.querySelector('#btnCancelar');
 	        var criandoNovoAplicativo = false;
+
+			const relatorioAplicativo = document.getElementById('relatorioAplicativo');
+			const relatorioAplicativoNome = document.getElementById('relatorioAplicativoNome');
 	        
 	        inicializar();
 
@@ -228,6 +247,74 @@
 	        		.then(resposta => inicializar())
 	        		.catch(function(error) { paragrafoMensagem.innerHTML = 'Erro ao apagar Aplicativo (código ' + error.message + ')'; } );	        		
 	        }
+
+			function selecionaAplicativoPeloId() {
+                const id = document.getElementById('BuscarPeloIdInput').value;
+                if (!id) {
+                    relatorioAplicativo.innerHTML = '<p>Por favor, insira um ID de aplicativo.</p>';
+                    return;
+                }
+                
+                const URL = `/api/aplicativos/${id}`;
+                fetch(URL)
+                    .then(resposta => {
+                        if (!resposta.ok) {
+                            throw new Error(`Erro ao buscar aplicativo (código ${resposta.status})`);
+                        }
+                        return resposta.json();
+                    })
+                    .then(jsonResponse => preencherExportacaoAplicativo(jsonResponse))
+                    .catch(error => {
+                        relatorioAplicativo.innerHTML = `<p>${error.message}</p>`;
+                    });
+            }
+
+            function preencherExportacaoAplicativo(aplicativo) {
+                const relatorio = `
+                    <p>ID: ${aplicativo.id}</p>
+                    <p>Nome: ${aplicativo.nome}</p>
+                    <p>Desenvolvedor: ${aplicativo.desenvolvedor}</p>
+                    <p>Downloads: ${aplicativo.downloads}</p>
+					<p>Time: ${aplicativo.time.nome}</p>
+                `;
+                relatorioAplicativo.innerHTML = relatorio;
+            }
+
+			function selecionaAplicativoPeloNome() {
+                const nome = document.getElementById('BuscarPeloNomeInput').value;
+                if (!nome) {
+                    relatorioAplicativoNome.innerHTML = '<p>Por favor, insira um nome de um aplicativo.</p>';
+                    return;
+                }
+                
+                const URL = `/api/aplicativos/nome?nome=${nome}`;
+                fetch(URL)
+                    .then(resposta => {
+                        if (!resposta.ok) {
+                            throw new Error(`Erro ao buscar aplicativo (código ${resposta.status})`);
+                        }
+                        return resposta.json();
+                    })
+                    .then(jsonResponse => preencherExportacaoAplicativoNome(jsonResponse))
+                    .catch(error => {
+                        relatorioAplicativoNome.innerHTML = `<p>${error.message}</p>`;
+                    });
+            }
+
+            function preencherExportacaoAplicativoNome(aplicativos) {
+				var relatorio = '';
+	        	var n = aplicativos.length;
+	        	for (var i = 0; i < n; i++) {
+	        		var a = aplicativos[i];
+	        		relatorio += `
+                    <p>ID: ${a.id}</p>
+                    <p>Nome: ${a.nome}</p>
+                    <p>Desenvolvedor: ${a.desenvolvedor}</p>
+                    <p>Downloads: ${a.downloads}</p>
+					<p>Time: ${a.time.nome}</p>`
+	        	}
+                relatorioAplicativoNome.innerHTML = relatorio;
+            }
 	        
 	    </script>    
     </body>
