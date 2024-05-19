@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>RestAPIAplicativos</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
+    </head>
+    <body>
+        <h1><a href="index.html">Home Page</a></h1>
+        <h1>Gerenciamento de Aplicativos</h1>
+
+        <table>    
+            <tr> <td>ID:</td> <td><input type="text" id="txtID"></td> </tr>
+            <tr> <td>Nome:</td> <td><input type="text" id="txtNome"></td> </tr>
+            <tr> <td>Desenvolvedor:</td> <td><input type="text" id="txtDesenvolvedor"></td> </tr>
+            <tr> <td>Downloads:</td> <td><input type="text" id="txtDownloads"></td> </tr> 
+            <!-- <tr> <td>Faculdade:</td> <td><select id="selectFaculdade"></select></td> </tr>            -->
+            <tr><td></td><td>
+                <input type="button" value="Novo" onclick="novoAplicativo()" id="btnNovo">
+                <input type="button" value="Salvar" onclick="salvarAplicativo()" id="btnSalvar">
+                <input type="button" value="Apagar" onclick="apagarAplicativo()" id="btnApagar">
+                <input type="button" value="Cancelar" onclick="cancelarEdicao()" id="btnCancelar">
+            </td></tr>
+        </table> 
+        
+		<p style="font-weight:bold" id="paragrafoMensagem"></p>
+		
+        <table>    
+            <tr> <th>ID</th> <th>Nome</th> <th>Desenvolvedor</th> <th>Downloads</th> </tr>
+            <tbody id="corpoTabelaAplicativos"> </tbody>
+        </table>
+        
+	    <script>
+	        const corpoTabela = document.querySelector('#corpoTabelaAplicativos');
+	        const paragrafoMensagem = document.querySelector('#paragrafoMensagem');
+	        const txtID = document.querySelector('#txtID');
+	        const txtNome = document.querySelector('#txtNome');
+	        const txtDesenvolvedor = document.querySelector('#txtDesenvolvedor');
+	        const txtDownloads = document.querySelector('#txtDownloads');
+	        // const selectFaculdade = document.querySelector('#selectFaculdade');
+	        const btnNovo = document.querySelector('#btnNovo');
+	        const btnSalvar = document.querySelector('#btnSalvar');
+	        const btnApagar = document.querySelector('#btnApagar');
+	        const btnCancelar = document.querySelector('#btnCancelar');
+	        var criandoNovoAplicativo = false;
+	        
+	        inicializar();
+
+	        function inicializar() {
+	        	criandoovoAplicativo = false;
+	            paragrafoMensagem.innerHTML = 'Pressione o botão Novo ou selecione um aplicativo da lista:'
+	            txtID.value = '';
+	            txtNome.value = '';
+	            txtDesenvolvedor.value = '';
+	            txtDownloads.value = '';
+	            txtID.disabled = true;
+	            txtNome.disabled = true;
+	            txtDesenvolvedor.disabled = true;
+	            txtDownloads.disabled = true;
+	            // selectFaculdade.disabled = true;
+	            // carregarFaculdades();
+	            // selectFaculdade.selectedIndex = -1;
+	            btnNovo.disabled = false;
+	            btnSalvar.disabled = true;
+	            btnApagar.disabled = true;
+	            btnCancelar.disabled = true;
+	            listarTodosAplicativos();            
+	        }
+
+	        async function listarTodosAplicativos() {
+	            const URL = `/api/aplicativos`;
+	            fetch(URL)
+	              .then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta;}) 
+	              .then(resposta => resposta.json())
+	              .then(jsonResponse => preencherTabela(jsonResponse))
+	              .catch(function(error) { paragrafoMensagem.innerHTML = "Erro ao listar aplicativos (código " + error.message + ")";});
+	        }
+	        
+	        function preencherTabela(aplicativos) {
+	            var linhasTabela = '';
+	            var n = aplicativos.length;
+	            for (var i = 0; i < n; i++) {
+	                var a = aplicativos[i];
+	                linhasTabela += 
+	                	`<tr><td><a href="javascript:void(0)" onclick="selecionarAplicativo('${a.id}','${a.nome}','${a.desenvolvedor}','${a.downloads}')">` 
+	                    + a.id     + '</a></td>' + 
+	                    '<td>' + a.nome   + '</td>' +
+	                    '<td>' + a.desenvolvedor   + '</td>' +
+	                    '<td>' + a.downloads   + '</td></tr>\n';
+	            }
+	            corpoTabela.innerHTML = linhasTabela;
+	        }
+
+	        // async function carregarFaculdades() {
+	        // 	const URL = `/api/faculdades`;
+	        //     fetch(URL)
+	        //       .then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta;}) 
+	        //       .then(resposta => resposta.json())
+	        //       .then(jsonResponse => preencherSelectFaculdades(jsonResponse))
+	        //       .catch(function(error) { paragrafoMensagem.innerHTML = "Erro ao carregar faculdades (código " + error.message + ")";});
+	        // }
+	        
+	        // function preencherSelectFaculdades(faculdades) {
+	        // 	var opcoes = '';
+	        // 	var n = faculdades.length;
+	        // 	for (var i = 0; i < n; i++) {
+	        // 		var f = faculdades[i];
+	        // 		opcoes += `<option value="${f.id}">${f.nome}</option>`
+	        // 	}
+	        // 	selectFaculdade.innerHTML = opcoes;
+	        // }
+	        
+	        function selecionarAplicativo(id, nome, desenvolvedor, downloads) {
+	        	criandoNovoAplicativo = false;
+	        	// carregarFaculdades();
+	        	
+	            paragrafoMensagem.innerHTML = 'Altere e salve os dados do aplicativo, ou então apague o registro do aplicativo.'
+	            txtID.value = id;
+	            txtNome.value = nome;
+	            txtDesenvolvedor.value = desenvolvedor;
+	            txtDownloads.value = downloads;
+	            // selectFaculdade.value = faculdadeId;
+	            // console.log('faculdadeId: ', faculdadeId);
+	            
+	            txtID.disabled = true;
+	            txtNome.disabled = false;
+	            txtDesenvolvedor.disabled = false;
+	            txtDownloads.disabled = false;
+	            // selectFaculdade.disabled = false;
+	            
+	            btnNovo.disabled = true;
+	            btnSalvar.disabled = false;
+	            btnApagar.disabled = false;
+	            btnCancelar.disabled = false;  
+	        }
+
+	        function novoAplicativo() {
+	        	paragrafoMensagem.innerHTML = 'Preencha os dados do novo aplicativo...';
+	        	criandoNovoAplicativo = true;
+	        	// carregarFaculdades();
+	        	
+	        	txtID.value = '';
+	        	txtNome.value = '';
+	        	txtDesenvolvedor.value = '';
+	        	txtDownloads.value = '';
+	        	// selectFaculdade.selectedIndex = -1;
+	        	
+	        	txtID.disabled = true;
+	        	txtNome.disabled = false;
+	        	txtDesenvolvedor.disabled = false;
+	        	txtDownloads.disabled = false;
+	        	// selectFaculdade.disabled = false;
+	        	
+	        	btnNovo.disabled = true;
+	        	btnSalvar.disabled = false;
+	        	btnApagar.disabled = true;
+	        	btnCancelar.disabled = false;
+	        }
+	        
+	        function salvarAplicativo() {
+	        	if (criandoNovoAplicativo) {
+	        		criarAplicativo();
+	        	}
+	        	else {
+	        		alterarAplicativo();
+	        	}
+	        }
+	        
+	        async function criarAplicativo() {
+	        	const URL = `/api/aplicativos`;
+	        	const dadosAplicativo = {
+	        		'nome': txtNome.value,
+	        		'desenvolvedor': txtDesenvolvedor.value,
+	        		'downloads': txtDownloads.value,
+	        	};
+	        	const postRequest = {
+	        		method: 'POST',
+	        		body: JSON.stringify(dadosAplicativo),
+	        		headers: { 'Content-type': 'application/json' }
+	        	};
+	        	fetch(URL, postRequest)
+	        		.then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta; } )
+	        		.then(resposta => resposta.json())
+	        		.then(jsonResponse => inicializar())
+	        		.catch(function(error) { paragrafoMensagem.innerHTML = 'Erro ao criar novo aplicativo (código ' + error.message + ')'; } );
+	        }
+	        
+	        async function alterarAplicativo() {
+	        	const ID = txtID.value;
+	        	const URL = `/api/aplicativos/${ID}`;
+	        	const dadosAplicativo = {
+	        		'id': ID,
+	        		'nome': txtNome.value,
+	        		'desenvolvedor': txtDesenvolvedor.value,
+	        		'downloads': txtDownloads.value,
+	        	};
+	        	const putRequest = {
+	        		method: 'PUT',
+	        		body: JSON.stringify(dadosAplicativo),
+	        		headers: { 'Content-type': 'application/json' }
+	        	};
+	        	fetch(URL, putRequest)
+	        		.then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta; } )
+	        		.then(resposta => resposta.json())
+	        		.then(jsonResponse => inicializar())
+	        		.catch(function(error) { paragrafoMensagem.innerHTML = 'Erro ao alterar aplicativo (código ' + error.message + ')'; } );	        	
+	        }
+	        
+	        function cancelarEdicao() {
+	        	inicializar();
+	        }
+	        
+	        async function apagarAplicativo() {
+	        	const ID = txtID.value;
+	        	const URL = `/api/aplicativos/${ID}`;
+	        	const deleteRequest = {
+	        		method: 'DELETE'
+	        	};
+	        	fetch(URL, deleteRequest)
+	        		.then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta; } )
+	        		.then(resposta => inicializar())
+	        		.catch(function(error) { paragrafoMensagem.innerHTML = 'Erro ao apagar Aplicativo (código ' + error.message + ')'; } );	        		
+	        }
+	        
+	    </script>    
+    </body>
+</html>

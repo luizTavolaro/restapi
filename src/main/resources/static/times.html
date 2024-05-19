@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>RestAPITimes</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
+    </head>
+    <body>
+        <h1><a href="index.html">Home Page</a></h1>
+        <h1>Gerenciamento de Times</h1>
+
+        <table>    
+            <tr> <td>ID:</td> <td><input type="text" id="txtID"></td> </tr>
+            <tr> <td>Ano Fundação:</td> <td><input type="text" id="txtAnoFundacao"></td> </tr>
+			<tr> <td>Nome:</td> <td><input type="text" id="txtNome"></td> </tr>
+            <tr> <td>Cidade:</td> <td><input type="text" id="txtCidade"></td> </tr>
+            <tr> <td>Estado:</td> <td><input type="text" id="txtEstado"></td> </tr> 
+            <!-- <tr> <td>Faculdade:</td> <td><select id="selectFaculdade"></select></td> </tr>            -->
+            <tr><td></td><td>
+                <input type="button" value="Novo" onclick="novoTime()" id="btnNovo">
+                <input type="button" value="Salvar" onclick="salvarTime()" id="btnSalvar">
+                <input type="button" value="Apagar" onclick="apagarTime()" id="btnApagar">
+                <input type="button" value="Cancelar" onclick="cancelarEdicao()" id="btnCancelar">
+            </td></tr>
+        </table> 
+        
+		<p style="font-weight:bold" id="paragrafoMensagem"></p>
+		
+        <table>    
+            <tr> <th>ID</th> <th>Nome</th> <th>Ano Fundação</th> <th>Cidade</th> <th>Estado</th> </tr>
+            <tbody id="corpoTabelaProdutos"> </tbody>
+        </table>
+        
+		<script src="script.js"></script>
+	    <script>
+	        const corpoTabela = document.querySelector('#corpoTabelaProdutos');
+	        const paragrafoMensagem = document.querySelector('#paragrafoMensagem');
+	        const txtID = document.querySelector('#txtID');
+	        const txtAnoFundacao = document.querySelector('#txtAnoFundacao');
+	        const txtNome = document.querySelector('#txtNome');
+			const txtCidade = document.querySelector('#txtCidade');
+	        const txtEstado = document.querySelector('#txtEstado');
+	        // const selectFaculdade = document.querySelector('#selectFaculdade');
+	        const btnNovo = document.querySelector('#btnNovo');
+	        const btnSalvar = document.querySelector('#btnSalvar');
+	        const btnApagar = document.querySelector('#btnApagar');
+	        const btnCancelar = document.querySelector('#btnCancelar');
+	        var criandoNovoTime = false;
+	        
+	        inicializar();
+
+	        function inicializar() {
+	        	criandoNovoTime = false;
+	            paragrafoMensagem.innerHTML = 'Pressione o botão Novo ou selecione um produto da lista:'
+	            txtID.value = '';
+	            txtAnoFundacao.value = '';
+	            txtNome.value = '';
+				txtCidade.value = '';
+	            txtEstado.value = '';
+	            txtID.disabled = true;
+	            txtAnoFundacao.disabled = true;
+	            txtNome.disabled = true;
+				txtCidade.disabled = true;
+	            txtEstado.disabled = true;
+	            // selectFaculdade.disabled = true;
+	            // carregarFaculdades();
+	            // selectFaculdade.selectedIndex = -1;
+	            btnNovo.disabled = false;
+	            btnSalvar.disabled = true;
+	            btnApagar.disabled = true;
+	            btnCancelar.disabled = true;
+	            listarTodosTimes();            
+	        }
+
+	        async function listarTodosTimes() {
+				fetch('/api/times' ,{
+    			    method: 'GET',
+    			})
+	            .then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta;}) 
+	            .then(resposta => resposta.json())
+	            .then(jsonResponse => preencherTabela(jsonResponse))
+	            .catch(function(error) { paragrafoMensagem.innerHTML = "Erro ao listar times (código " + error.message + ")";});
+	        }
+	        
+	        function preencherTabela(times) {
+	            var linhasTabela = '';
+	            var n = times.length;
+	            for (var i = 0; i < n; i++) {
+	                var t = times[i];
+	                linhasTabela += 
+	                	`<tr><td><a href="javascript:void(0)" onclick="selecionarTime('${t.id}','${t.anofundacao}','${t.nome}','${t.cidade}','${t.estado}')">` 
+	                    + p.id     + '</a></td>' + 
+	                    '<td>' + p.anofundacao   + '</td>' +
+	                    '<td>' + p.nome   + '</td>' +
+						'<td>' + p.cidade   + '</td>' +
+	                    '<td>' + p.estado   + '</td></tr>\n';
+	            }
+	            corpoTabela.innerHTML = linhasTabela;
+	        }
+
+	        // async function carregarFaculdades() {
+	        // 	const URL = `/api/faculdades`;
+	        //     fetch(URL)
+	        //       .then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta;}) 
+	        //       .then(resposta => resposta.json())
+	        //       .then(jsonResponse => preencherSelectFaculdades(jsonResponse))
+	        //       .catch(function(error) { paragrafoMensagem.innerHTML = "Erro ao carregar faculdades (código " + error.message + ")";});
+	        // }
+	        
+	        // function preencherSelectFaculdades(faculdades) {
+	        // 	var opcoes = '';
+	        // 	var n = faculdades.length;
+	        // 	for (var i = 0; i < n; i++) {
+	        // 		var f = faculdades[i];
+	        // 		opcoes += `<option value="${f.id}">${f.nome}</option>`
+	        // 	}
+	        // 	selectFaculdade.innerHTML = opcoes;
+	        // }
+	        
+	        function selecionarTime(id, anofundacao, nome, cidade, estado) {
+	        	criandoNovoTime = false;
+	        	// carregarFaculdades();
+	        	
+	            paragrafoMensagem.innerHTML = 'Altere e salve os dados do produto, ou então apague o registro do produto.'
+	            txtID.value = id;
+	            txtAnoFundacao.value = anofundacao;
+	            txtNome.value = nome;
+				txtCidade.value = cidade;
+	            txtEstado.value = estado;
+	            // selectFaculdade.value = faculdadeId;
+	            // console.log('faculdadeId: ', faculdadeId);
+	            
+	            txtID.disabled = true;
+	            txtAnoFundacao.disabled = false;
+				txtNome.disabled = false;
+	            txtCidade.disabled = false;
+	            txtEstado.disabled = false;
+	            // selectFaculdade.disabled = false;
+	            
+	            btnNovo.disabled = true;
+	            btnSalvar.disabled = false;
+	            btnApagar.disabled = false;
+	            btnCancelar.disabled = false;  
+	        }
+
+	        function novoTime() {
+	        	paragrafoMensagem.innerHTML = 'Preencha os dados do novo produto...';
+	        	criandoNovoTime = true;
+	        	// carregarFaculdades();
+	        	
+	        	txtID.value = '';
+	        	txtAnoFundacao.value = '';
+				txtNome.value = '';
+	        	txtCidade.value = '';
+	        	txtEstado.value = '';
+	        	// selectFaculdade.selectedIndex = -1;
+	        	
+	        	txtID.disabled = true;
+	        	txtAnoFundacao.disabled = false;
+				txtNome.disabled = false;
+	        	txtCidade.disabled = false;
+	        	txtEstado.disabled = false;
+	        	// selectFaculdade.disabled = false;
+	        	
+	        	btnNovo.disabled = true;
+	        	btnSalvar.disabled = false;
+	        	btnApagar.disabled = true;
+	        	btnCancelar.disabled = false;
+	        }
+	        
+	        function salvarTime() {
+	        	if (criandoNovoTime) {
+	        		criarTime();
+	        	}
+	        	else {
+	        		alterarTime();
+	        	}
+	        }
+	        
+	        async function criarTime() {
+	        	const URL = `/api/times`;
+	        	const dadosTime = {
+	        		'anofundacao': txtAnoFundacao.value,
+					'nome': txtNome.value,
+	        		'cidade': txtCidade.value,
+	        		'estado': txtEstado.value,
+	        	};
+	        	const postRequest = {
+	        		method: 'POST',
+	        		body: JSON.stringify(dadosTime),
+	        		headers: { 'Content-type': 'application/json' }
+	        	};
+	        	fetch(URL, postRequest)
+	        		.then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta; } )
+	        		.then(resposta => resposta.json())
+	        		.then(jsonResponse => inicializar())
+	        		.catch(function(error) { paragrafoMensagem.innerHTML = 'Erro ao criar novo time (código ' + error.message + ')'; } );
+	        }
+	        
+	        async function alterarTime() {
+	        	const ID = txtID.value;
+	        	const URL = `/api/times/${ID}`;
+	        	const dadosTime = {
+	        		'id': ID,
+	        		'anofundacao': txtAnoFundacao.value,
+					'nome': txtNome.value,
+	        		'cidade': txtCidade.value,
+	        		'estado': txtEstado.value,
+	        	};
+	        	const putRequest = {
+	        		method: 'PUT',
+	        		body: JSON.stringify(dadosTime),
+	        		headers: { 'Content-type': 'application/json' }
+	        	};
+	        	fetch(URL, putRequest)
+	        		.then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta; } )
+	        		.then(resposta => resposta.json())
+	        		.then(jsonResponse => inicializar())
+	        		.catch(function(error) { paragrafoMensagem.innerHTML = 'Erro ao alterar time (código ' + error.message + ')'; } );	        	
+	        }
+	        
+	        function cancelarEdicao() {
+	        	inicializar();
+	        }
+	        
+	        async function apagarTime() {
+	        	const ID = txtID.value;
+	        	const URL = `/api/times/${ID}`;
+	        	const deleteRequest = {
+	        		method: 'DELETE'
+	        	};
+	        	fetch(URL, deleteRequest)
+	        		.then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta; } )
+	        		.then(resposta => inicializar())
+	        		.catch(function(error) { paragrafoMensagem.innerHTML = 'Erro ao apagar produto (código ' + error.message + ')'; } );	        		
+	        }
+	        
+	    </script>    
+    </body>
+</html>
