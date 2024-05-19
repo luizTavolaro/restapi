@@ -14,7 +14,7 @@
             <tr> <td>Descricao:</td> <td><input type="text" id="txtDescricao"></td> </tr>
             <tr> <td>Marca:</td> <td><input type="text" id="txtMarca"></td> </tr>
             <tr> <td>Valor:</td> <td><input type="text" id="txtValor"></td> </tr> 
-            <!-- <tr> <td>Faculdade:</td> <td><select id="selectFaculdade"></select></td> </tr>            -->
+            <tr> <td>Time:</td> <td><select id="selectTime"></select></td> </tr>           
             <tr><td></td><td>
                 <input type="button" value="Novo" onclick="novoProduto()" id="btnNovo">
                 <input type="button" value="Salvar" onclick="salvarProduto()" id="btnSalvar">
@@ -26,7 +26,7 @@
 		<p style="font-weight:bold" id="paragrafoMensagem"></p>
 		
         <table>    
-            <tr> <th>ID</th> <th>Descricao</th> <th>Marca</th> <th>Valor</th> </tr>
+            <tr> <th>ID</th> <th>Descricao</th> <th>Marca</th> <th>Valor</th> <th>Time</th></tr>
             <tbody id="corpoTabelaProdutos"> </tbody>
         </table>
         
@@ -37,7 +37,7 @@
 	        const txtDescricao = document.querySelector('#txtDescricao');
 	        const txtMarca = document.querySelector('#txtMarca');
 	        const txtValor = document.querySelector('#txtValor');
-	        // const selectFaculdade = document.querySelector('#selectFaculdade');
+	        const selectTime = document.querySelector('#selectTime');
 	        const btnNovo = document.querySelector('#btnNovo');
 	        const btnSalvar = document.querySelector('#btnSalvar');
 	        const btnApagar = document.querySelector('#btnApagar');
@@ -57,9 +57,9 @@
 	            txtDescricao.disabled = true;
 	            txtMarca.disabled = true;
 	            txtValor.disabled = true;
-	            // selectFaculdade.disabled = true;
-	            // carregarFaculdades();
-	            // selectFaculdade.selectedIndex = -1;
+	            selectTime.disabled = true;
+	            carregarTimes();
+	            selectTime.selectedIndex = -1;
 	            btnNovo.disabled = false;
 	            btnSalvar.disabled = true;
 	            btnApagar.disabled = true;
@@ -82,51 +82,52 @@
 	            for (var i = 0; i < n; i++) {
 	                var p = produtos[i];
 	                linhasTabela += 
-	                	`<tr><td><a href="javascript:void(0)" onclick="selecionarProduto('${p.id}','${p.descricao}','${p.marca}','${p.valor}')">` 
+	                	`<tr><td><a href="javascript:void(0)" onclick="selecionarProduto('${p.id}','${p.descricao}','${p.marca}','${p.valor}','${p.time.id}')">` 
 	                    + p.id     + '</a></td>' + 
 	                    '<td>' + p.descricao   + '</td>' +
 	                    '<td>' + p.marca   + '</td>' +
-	                    '<td>' + p.valor   + '</td></tr>\n';
+						'<td>' + p.valor   + '</td>' +
+	                    '<td>' + p.time.nome   + '</td></tr>\n';
 	            }
 	            corpoTabela.innerHTML = linhasTabela;
 	        }
 
-	        // async function carregarFaculdades() {
-	        // 	const URL = `/api/faculdades`;
-	        //     fetch(URL)
-	        //       .then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta;}) 
-	        //       .then(resposta => resposta.json())
-	        //       .then(jsonResponse => preencherSelectFaculdades(jsonResponse))
-	        //       .catch(function(error) { paragrafoMensagem.innerHTML = "Erro ao carregar faculdades (código " + error.message + ")";});
-	        // }
+	        async function carregarTimes() {
+	        	const URL = `/api/times`;
+	            fetch(URL)
+	              .then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta;}) 
+	              .then(resposta => resposta.json())
+	              .then(jsonResponse => preencherselectTimes(jsonResponse))
+	              .catch(function(error) { paragrafoMensagem.innerHTML = "Erro ao carregar times (código " + error.message + ")";});
+	        }
 	        
-	        // function preencherSelectFaculdades(faculdades) {
-	        // 	var opcoes = '';
-	        // 	var n = faculdades.length;
-	        // 	for (var i = 0; i < n; i++) {
-	        // 		var f = faculdades[i];
-	        // 		opcoes += `<option value="${f.id}">${f.nome}</option>`
-	        // 	}
-	        // 	selectFaculdade.innerHTML = opcoes;
-	        // }
+	        function preencherselectTimes(times) {
+	        	var opcoes = '';
+	        	var n = times.length;
+	        	for (var i = 0; i < n; i++) {
+	        		var t = times[i];
+	        		opcoes += `<option value="${t.id}">${t.nome}</option>`
+	        	}
+	        	selectTime.innerHTML = opcoes;
+	        }
 	        
-	        function selecionarProduto(id, descricao, marca, valor) {
+	        function selecionarProduto(id, descricao, marca, valor, time_id) {
 	        	criandoNovoProduto = false;
-	        	// carregarFaculdades();
+	        	carregarTimes();
 	        	
 	            paragrafoMensagem.innerHTML = 'Altere e salve os dados do produto, ou então apague o registro do produto.'
 	            txtID.value = id;
 	            txtDescricao.value = descricao;
 	            txtMarca.value = marca;
 	            txtValor.value = valor;
-	            // selectFaculdade.value = faculdadeId;
-	            // console.log('faculdadeId: ', faculdadeId);
+	            selectTime.value = time_id;
+	            console.log('time_id: ', time_id);
 	            
 	            txtID.disabled = true;
 	            txtDescricao.disabled = false;
 	            txtMarca.disabled = false;
 	            txtValor.disabled = false;
-	            // selectFaculdade.disabled = false;
+	            selectTime.disabled = false;
 	            
 	            btnNovo.disabled = true;
 	            btnSalvar.disabled = false;
@@ -137,19 +138,19 @@
 	        function novoProduto() {
 	        	paragrafoMensagem.innerHTML = 'Preencha os dados do novo produto...';
 	        	criandoNovoProduto = true;
-	        	// carregarFaculdades();
+	        	carregarTimes();
 	        	
 	        	txtID.value = '';
 	        	txtDescricao.value = '';
 	        	txtMarca.value = '';
 	        	txtValor.value = '';
-	        	// selectFaculdade.selectedIndex = -1;
+	        	selectTime.selectedIndex = -1;
 	        	
 	        	txtID.disabled = true;
 	        	txtDescricao.disabled = false;
 	        	txtMarca.disabled = false;
 	        	txtValor.disabled = false;
-	        	// selectFaculdade.disabled = false;
+	        	selectTime.disabled = false;
 	        	
 	        	btnNovo.disabled = true;
 	        	btnSalvar.disabled = false;
@@ -172,6 +173,9 @@
 	        		'descricao': txtDescricao.value,
 	        		'marca': txtMarca.value,
 	        		'valor': txtValor.value,
+					'time': { 
+						'id': selectTime.value
+					}
 	        	};
 	        	const postRequest = {
 	        		method: 'POST',
@@ -193,6 +197,9 @@
 	        		'descricao': txtDescricao.value,
 	        		'marca': txtMarca.value,
 	        		'valor': txtValor.value,
+					'time': { 
+						'id': selectTime.value
+					}
 	        	};
 	        	const putRequest = {
 	        		method: 'PUT',

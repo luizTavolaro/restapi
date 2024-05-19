@@ -3,7 +3,7 @@ package ps2.restapi;
 import javax.persistence.*;
 
 @Entity
-@Table(name="produtos")
+@Table(name="produtos_time")
 
 public class Produto {
     @Id @GeneratedValue
@@ -11,8 +11,11 @@ public class Produto {
     private String descricao;
     private String marca;
     private double valor;
+    @ManyToOne
+    @JoinColumn(name = "time_id", nullable = false)
+    private Time time;
 
-	public Produto() {
+    public Produto() {
 		super();
 	}
 
@@ -39,6 +42,12 @@ public class Produto {
     }
     public void setValor(double valor) {
         this.valor = valor;
+    }
+    public Time getTime() {
+        return time;
+    }
+    public void setTime(Time time) {
+        this.time = time;
     }
 
     
