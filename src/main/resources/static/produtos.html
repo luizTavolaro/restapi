@@ -29,7 +29,23 @@
             <tr> <th>ID</th> <th>Descricao</th> <th>Marca</th> <th>Valor</th> <th>Time</th></tr>
             <tbody id="corpoTabelaProdutos"> </tbody>
         </table>
+
+		<hr>
+
+		<p style="font-weight: bold;">Busca Pelo Id</p>
+
+		<input type="text" id="BuscarPeloIdInput" placeholder="ID Produto">
+		<input type="button"  id="BuscarPeloIdBtn" value="Buscar Pelo Id" onclick="selecionaProdutoPeloId()">
+		<div id="relatorioProduto"></div>
+
+		<hr>
+
+		<p style="font-weight: bold;">Busca Pela Marca</p>
         
+		<input type="text" id="BuscarPelaMarcaInput" placeholder="Marca">
+		<input type="button"  id="BuscarPelaMarcaBtn" value="Buscar Pela Marca" onclick="selecionaProdutoPelaMarca()">
+		<div id="relatorioProdutoMarcas"></div>
+
 	    <script>
 	        const corpoTabela = document.querySelector('#corpoTabelaProdutos');
 	        const paragrafoMensagem = document.querySelector('#paragrafoMensagem');
@@ -43,6 +59,9 @@
 	        const btnApagar = document.querySelector('#btnApagar');
 	        const btnCancelar = document.querySelector('#btnCancelar');
 	        var criandoNovoProduto = false;
+
+			const relatorioProduto = document.getElementById('relatorioProduto');
+			const relatorioProdutoMarcas = document.getElementById('relatorioProdutoMarcas');
 	        
 	        inicializar();
 
@@ -228,7 +247,74 @@
 	        		.then(resposta => inicializar())
 	        		.catch(function(error) { paragrafoMensagem.innerHTML = 'Erro ao apagar produto (código ' + error.message + ')'; } );	        		
 	        }
-	        
+
+			function selecionaProdutoPeloId() {
+                const id = document.getElementById('BuscarPeloIdInput').value;
+                if (!id) {
+                    relatorioProduto.innerHTML = '<p>Por favor, insira um ID de produto.</p>';
+                    return;
+                }
+                
+                const URL = `/api/produtos/${id}`;
+                fetch(URL)
+                    .then(resposta => {
+                        if (!resposta.ok) {
+                            throw new Error(`Erro ao buscar produto (código ${resposta.status})`);
+                        }
+                        return resposta.json();
+                    })
+                    .then(jsonResponse => preencherExportacaoProduto(jsonResponse))
+                    .catch(error => {
+                        relatorioProduto.innerHTML = `<p>${error.message}</p>`;
+                    });
+            }
+
+            function preencherExportacaoProduto(produto) {
+                const relatorio = `
+                    <p>ID: ${produto.id}</p>
+                    <p>Descrição: ${produto.descricao}</p>
+                    <p>Marca: ${produto.marca}</p>
+                    <p>Valor: ${produto.valor}</p>
+                `;
+                relatorioProduto.innerHTML = relatorio;
+            }
+
+			function selecionaProdutoPelaMarca() {
+                const marca = document.getElementById('BuscarPelaMarcaInput').value;
+                if (!marca) {
+                    relatorioProdutoMarcas.innerHTML = '<p>Por favor, insira uma marca de produto.</p>';
+                    return;
+                }
+                
+                const URL = `/api/produtos/marca?marca=${marca}`;
+                fetch(URL)
+                    .then(resposta => {
+                        if (!resposta.ok) {
+                            throw new Error(`Erro ao buscar produto (código ${resposta.status})`);
+                        }
+                        return resposta.json();
+                    })
+                    .then(jsonResponse => preencherExportacaoProdutoMarca(jsonResponse))
+                    .catch(error => {
+                        relatorioProdutoMarcas.innerHTML = `<p>${error.message}</p>`;
+                    });
+            }
+
+            function preencherExportacaoProdutoMarca(produtos) {
+				var relatorio = '';
+	        	var n = produtos.length;
+	        	for (var i = 0; i < n; i++) {
+	        		var p = produtos[i];
+	        		relatorio += `
+                    <p>ID: ${p.id}</p>
+                    <p>Descrição: ${p.descricao}</p>
+                    <p>Marca: ${p.marca}</p>
+                    <p>Valor: ${p.valor}</p>
+                	`;
+	        	}
+                relatorioProdutoMarcas.innerHTML = relatorio;
+            }
+
 	    </script>    
     </body>
 </html>
