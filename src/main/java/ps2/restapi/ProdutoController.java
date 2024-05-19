@@ -53,10 +53,10 @@ public class ProdutoController {
 				return opt;
 			}
 		}
-		throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Erro ao alterar dados da faculdade com id " + produtoId);
+		throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Erro ao alterar dados do time com id " + produtoId);
 	}	
 	
-	@DeleteMapping("/api/disciplina/{id}")
+	@DeleteMapping("/api/produtos/{id}")
 	void deleteProduto(@PathVariable long id) {
 		produtosRepo.deleteById(id);
 	}		
