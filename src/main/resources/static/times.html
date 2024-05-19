@@ -15,7 +15,6 @@
 			<tr> <td>Nome:</td> <td><input type="text" id="txtNome"></td> </tr>
             <tr> <td>Cidade:</td> <td><input type="text" id="txtCidade"></td> </tr>
             <tr> <td>Estado:</td> <td><input type="text" id="txtEstado"></td> </tr> 
-            <!-- <tr> <td>Faculdade:</td> <td><select id="selectFaculdade"></select></td> </tr>            -->
             <tr><td></td><td>
                 <input type="button" value="Novo" onclick="novoTime()" id="btnNovo">
                 <input type="button" value="Salvar" onclick="salvarTime()" id="btnSalvar">
@@ -30,6 +29,22 @@
             <tr> <th>ID</th> <th>Ano Fundação</th>  <th>Nome</th>  <th>Cidade</th> <th>Estado</th> </tr>
             <tbody id="corpoTabelaProdutos"> </tbody>
         </table>
+
+		<hr>
+
+		<p style="font-weight: bold;">Busca Pelo Id</p>
+
+		<input type="text" id="BuscarPeloIdInput" placeholder="ID Time">
+		<input type="button"  id="BuscarPeloIdBtn" value="Buscar Pelo Id" onclick="selecionaTimePeloId()">
+		<div id="relatorioTime"></div>
+
+		<hr>
+
+		<p style="font-weight: bold;">Busca Pela Cidade</p>
+        
+		<input type="text" id="BuscarPelaCidadeInput" placeholder="Cidade">
+		<input type="button"  id="BuscarPelaMarcaBtn" value="Buscar Pela Cidade" onclick="selecionaTimePelaCidade()">
+		<div id="relatorioTimeCidade"></div>
         
 		<script src="script.js"></script>
 	    <script>
@@ -40,12 +55,14 @@
 	        const txtNome = document.querySelector('#txtNome');
 			const txtCidade = document.querySelector('#txtCidade');
 	        const txtEstado = document.querySelector('#txtEstado');
-	        // const selectFaculdade = document.querySelector('#selectFaculdade');
 	        const btnNovo = document.querySelector('#btnNovo');
 	        const btnSalvar = document.querySelector('#btnSalvar');
 	        const btnApagar = document.querySelector('#btnApagar');
 	        const btnCancelar = document.querySelector('#btnCancelar');
 	        var criandoNovoTime = false;
+
+			const relatorioTime = document.getElementById('relatorioTime');
+			const relatorioTimeCidade = document.getElementById('relatorioTimeCidade');
 	        
 	        inicializar();
 
@@ -62,9 +79,6 @@
 	            txtNome.disabled = true;
 				txtCidade.disabled = true;
 	            txtEstado.disabled = true;
-	            // selectFaculdade.disabled = true;
-	            // carregarFaculdades();
-	            // selectFaculdade.selectedIndex = -1;
 	            btnNovo.disabled = false;
 	            btnSalvar.disabled = true;
 	            btnApagar.disabled = true;
@@ -97,29 +111,9 @@
 	            }
 	            corpoTabela.innerHTML = linhasTabela;
 	        }
-
-	        // async function carregarFaculdades() {
-	        // 	const URL = `/api/faculdades`;
-	        //     fetch(URL)
-	        //       .then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta;}) 
-	        //       .then(resposta => resposta.json())
-	        //       .then(jsonResponse => preencherSelectFaculdades(jsonResponse))
-	        //       .catch(function(error) { paragrafoMensagem.innerHTML = "Erro ao carregar faculdades (código " + error.message + ")";});
-	        // }
-	        
-	        // function preencherSelectFaculdades(faculdades) {
-	        // 	var opcoes = '';
-	        // 	var n = faculdades.length;
-	        // 	for (var i = 0; i < n; i++) {
-	        // 		var f = faculdades[i];
-	        // 		opcoes += `<option value="${f.id}">${f.nome}</option>`
-	        // 	}
-	        // 	selectFaculdade.innerHTML = opcoes;
-	        // }
 	        
 	        function selecionarTime(id, anoFundacao, nome, cidade, estado) {
 	        	criandoNovoTime = false;
-	        	// carregarFaculdades();
 	        	
 	            paragrafoMensagem.innerHTML = 'Altere e salve os dados do produto, ou então apague o registro do produto.'
 	            txtID.value = id;
@@ -127,15 +121,12 @@
 	            txtNome.value = nome;
 				txtCidade.value = cidade;
 	            txtEstado.value = estado;
-	            // selectFaculdade.value = faculdadeId;
-	            // console.log('faculdadeId: ', faculdadeId);
-	            
+
 	            txtID.disabled = true;
 	            txtAnoFundacao.disabled = false;
 				txtNome.disabled = false;
 	            txtCidade.disabled = false;
 	            txtEstado.disabled = false;
-	            // selectFaculdade.disabled = false;
 	            
 	            btnNovo.disabled = true;
 	            btnSalvar.disabled = false;
@@ -146,21 +137,18 @@
 	        function novoTime() {
 	        	paragrafoMensagem.innerHTML = 'Preencha os dados do novo produto...';
 	        	criandoNovoTime = true;
-	        	// carregarFaculdades();
 	        	
 	        	txtID.value = '';
 	        	txtAnoFundacao.value = '';
 				txtNome.value = '';
 	        	txtCidade.value = '';
 	        	txtEstado.value = '';
-	        	// selectFaculdade.selectedIndex = -1;
 	        	
 	        	txtID.disabled = true;
 	        	txtAnoFundacao.disabled = false;
 				txtNome.disabled = false;
 	        	txtCidade.disabled = false;
 	        	txtEstado.disabled = false;
-	        	// selectFaculdade.disabled = false;
 	        	
 	        	btnNovo.disabled = true;
 	        	btnSalvar.disabled = false;
@@ -234,6 +222,75 @@
 	        		.then(resposta => inicializar())
 	        		.catch(function(error) { paragrafoMensagem.innerHTML = 'Erro ao apagar produto (código ' + error.message + ')'; } );	        		
 	        }
+
+			function selecionaTimePeloId() {
+                const id = document.getElementById('BuscarPeloIdInput').value;
+                if (!id) {
+                    relatorioTime.innerHTML = '<p>Por favor, insira um ID de time.</p>';
+                    return;
+                }
+                
+                const URL = `/api/times/${id}`;
+                fetch(URL)
+                    .then(resposta => {
+                        if (!resposta.ok) {
+                            throw new Error(`Erro ao buscar time (código ${resposta.status})`);
+                        }
+                        return resposta.json();
+                    })
+                    .then(jsonResponse => preencherExportacaoTime(jsonResponse))
+                    .catch(error => {
+                        relatorioTime.innerHTML = `<p>${error.message}</p>`;
+                    });
+            }
+
+            function preencherExportacaoTime(time) {
+                const relatorio = `
+                    <p>ID: ${time.id}</p>
+                    <p>Ano fundação: ${time.anoFundacao}</p>
+                    <p>Nome: ${time.nome}</p>
+                    <p>Cidade: ${time.cidade}</p>
+					<p>Estado: ${time.estado}</p>
+                `;
+                relatorioTime.innerHTML = relatorio;
+            }
+
+			function selecionaTimePelaCidade() {
+                const cidade = document.getElementById('BuscarPelaCidadeInput').value;
+                if (!cidade) {
+                    relatorioTimeCidade.innerHTML = '<p>Por favor, insira uma cidade de time.</p>';
+                    return;
+                }
+                
+                const URL = `/api/times/cidade?cidade=${cidade}`;
+                fetch(URL)
+                    .then(resposta => {
+                        if (!resposta.ok) {
+                            throw new Error(`Erro ao buscar time (código ${resposta.status})`);
+                        }
+                        return resposta.json();
+                    })
+                    .then(jsonResponse => preencherExportacaoTimeCidade(jsonResponse))
+                    .catch(error => {
+                        relatorioTimeCidade.innerHTML = `<p>${error.message}</p>`;
+                    });
+            }
+
+            function preencherExportacaoTimeCidade(times) {
+				var relatorio = '';
+	        	var n = times.length;
+	        	for (var i = 0; i < n; i++) {
+	        		var t = times[i];
+	        		relatorio += `
+                    <p>ID: ${t.id}</p>
+                    <p>Ano fundação: ${t.anoFundacao}</p>
+                    <p>Nome: ${t.nome}</p>
+                    <p>Cidade: ${t.cidade}</p>
+					<p>Estado: ${t.estado}</p>
+                	`;
+	        	}
+                relatorioTimeCidade.innerHTML = relatorio;
+            }
 	        
 	    </script>    
     </body>

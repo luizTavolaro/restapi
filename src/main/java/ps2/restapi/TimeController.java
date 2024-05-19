@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 // import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -30,6 +31,11 @@ public class TimeController {
 	@GetMapping("/api/times/{id}")
 	Optional<Time> getTime(@PathVariable long id) {
 		return timesRepo.findById(id);
+	}
+
+	@GetMapping("/api/times/cidade")
+	Iterable<Time> getTimeByCidade(@RequestParam(name = "cidade") String cidade) {
+		return timesRepo.findByCidade(cidade);
 	}
 	
 	@PostMapping("/api/times")
