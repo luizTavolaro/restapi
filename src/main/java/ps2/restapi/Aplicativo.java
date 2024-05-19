@@ -3,7 +3,7 @@ package ps2.restapi;
 import javax.persistence.*;
 
 @Entity
-@Table(name="aplicativo")
+@Table(name="aplicativo_time_v2")
 
 public class Aplicativo {
     @Id @GeneratedValue
@@ -11,6 +11,8 @@ public class Aplicativo {
     private String nome;
     private String desenvolvedor;
     private int downloads;
+    @OneToOne(optional=false)
+    private Time time;
 
     public Aplicativo() {
         super();
@@ -40,6 +42,13 @@ public class Aplicativo {
     public void setDownloads(int downloads) {
         this.downloads = downloads;
     }
+    public Time getTime() {
+        return time;
+    }
+    public void setTime(Time time) {
+        this.time = time;
+    }
+
 
 	
     
