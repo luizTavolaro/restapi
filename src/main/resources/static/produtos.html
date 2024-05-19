@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>RestAPIProdutos</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
+    </head>
+    <body>
+        <h1><a href="index.html">Home Page</a></h1>
+        <h1>Gerenciamento de Produtos</h1>
+
+        <table>    
+            <tr> <td>ID:</td> <td><input type="text" id="txtID"></td> </tr>
+            <tr> <td>Descricao:</td> <td><input type="text" id="txtDescricao"></td> </tr>
+            <tr> <td>Marca:</td> <td><input type="text" id="txtMarca"></td> </tr>
+            <tr> <td>Valor:</td> <td><input type="text" id="txtValor"></td> </tr> 
+            <!-- <tr> <td>Faculdade:</td> <td><select id="selectFaculdade"></select></td> </tr>            -->
+            <tr><td></td><td>
+                <input type="button" value="Novo" onclick="novoProduto()" id="btnNovo">
+                <input type="button" value="Salvar" onclick="salvarProduto()" id="btnSalvar">
+                <input type="button" value="Apagar" onclick="apagarProduto()" id="btnApagar">
+                <input type="button" value="Cancelar" onclick="cancelarEdicao()" id="btnCancelar">
+            </td></tr>
+        </table> 
+        
+		<p style="font-weight:bold" id="paragrafoMensagem"></p>
+		
+        <table>    
+            <tr> <th>ID</th> <th>Descricao</th> <th>Marca</th> <th>Valor</th> </tr>
+            <tbody id="corpoTabelaProdutos"> </tbody>
+        </table>
+        
+	    <script>
+	        const corpoTabela = document.querySelector('#corpoTabelaProdutos');
+	        const paragrafoMensagem = document.querySelector('#paragrafoMensagem');
+	        const txtID = document.querySelector('#txtID');
+	        const txtDescricao = document.querySelector('#txtDescricao');
+	        const txtMarca = document.querySelector('#txtMarca');
+	        const txtValor = document.querySelector('#txtValor');
+	        // const selectFaculdade = document.querySelector('#selectFaculdade');
+	        const btnNovo = document.querySelector('#btnNovo');
+	        const btnSalvar = document.querySelector('#btnSalvar');
+	        const btnApagar = document.querySelector('#btnApagar');
+	        const btnCancelar = document.querySelector('#btnCancelar');
+	        var criandoNovoProduto = false;
+	        
+	        inicializar();
+
+	        function inicializar() {
+	        	criandoNovoProduto = false;
+	            paragrafoMensagem.innerHTML = 'Pressione o botão Novo ou selecione um produto da lista:'
+	            txtID.value = '';
+	            txtDescricao.value = '';
+	            txtMarca.value = '';
+	            txtValor.value = '';
+	            txtID.disabled = true;
+	            txtDescricao.disabled = true;
+	            txtMarca.disabled = true;
+	            txtValor.disabled = true;
+	            // selectFaculdade.disabled = true;
+	            // carregarFaculdades();
+	            // selectFaculdade.selectedIndex = -1;
+	            btnNovo.disabled = false;
+	            btnSalvar.disabled = true;
+	            btnApagar.disabled = true;
+	            btnCancelar.disabled = true;
+	            listarTodosProdutos();            
+	        }
+
+	        async function listarTodosProdutos() {
+	            const URL = `/api/produtos`;
+	            fetch(URL)
+	              .then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta;}) 
+	              .then(resposta => resposta.json())
+	              .then(jsonResponse => preencherTabela(jsonResponse))
+	              .catch(function(error) { paragrafoMensagem.innerHTML = "Erro ao listar produtos (código " + error.message + ")";});
+	        }
+	        
+	        function preencherTabela(produtos) {
+	            var linhasTabela = '';
+	            var n = produtos.length;
+	            for (var i = 0; i < n; i++) {
+	                var p = produtos[i];
+	                linhasTabela += 
+	                	`<tr><td><a href="javascript:void(0)" onclick="selecionarProduto('${p.id}','${p.descricao}','${p.marca}','${p.valor}')">` 
+	                    + p.id     + '</a></td>' + 
+	                    '<td>' + p.descricao   + '</td>' +
+	                    '<td>' + p.marca   + '</td>' +
+	                    '<td>' + p.valor   + '</td></tr>\n';
+	            }
+	            corpoTabela.innerHTML = linhasTabela;
+	        }
+
+	        // async function carregarFaculdades() {
+	        // 	const URL = `/api/faculdades`;
+	        //     fetch(URL)
+	        //       .then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta;}) 
+	        //       .then(resposta => resposta.json())
+	        //       .then(jsonResponse => preencherSelectFaculdades(jsonResponse))
+	        //       .catch(function(error) { paragrafoMensagem.innerHTML = "Erro ao carregar faculdades (código " + error.message + ")";});
+	        // }
+	        
+	        // function preencherSelectFaculdades(faculdades) {
+	        // 	var opcoes = '';
+	        // 	var n = faculdades.length;
+	        // 	for (var i = 0; i < n; i++) {
+	        // 		var f = faculdades[i];
+	        // 		opcoes += `<option value="${f.id}">${f.nome}</option>`
+	        // 	}
+	        // 	selectFaculdade.innerHTML = opcoes;
+	        // }
+	        
+	        function selecionarProduto(id, descricao, marca, valor) {
+	        	criandoNovoProduto = false;
+	        	// carregarFaculdades();
+	        	
+	            paragrafoMensagem.innerHTML = 'Altere e salve os dados do produto, ou então apague o registro do produto.'
+	            txtID.value = id;
+	            txtDescricao.value = descricao;
+	            txtMarca.value = marca;
+	            txtValor.value = valor;
+	            // selectFaculdade.value = faculdadeId;
+	            // console.log('faculdadeId: ', faculdadeId);
+	            
+	            txtID.disabled = true;
+	            txtDescricao.disabled = false;
+	            txtMarca.disabled = false;
+	            txtValor.disabled = false;
+	            // selectFaculdade.disabled = false;
+	            
+	            btnNovo.disabled = true;
+	            btnSalvar.disabled = false;
+	            btnApagar.disabled = false;
+	            btnCancelar.disabled = false;  
+	        }
+
+	        function novoProduto() {
+	        	paragrafoMensagem.innerHTML = 'Preencha os dados do novo produto...';
+	        	criandoNovoProduto = true;
+	        	// carregarFaculdades();
+	        	
+	        	txtID.value = '';
+	        	txtDescricao.value = '';
+	        	txtMarca.value = '';
+	        	txtValor.value = '';
+	        	// selectFaculdade.selectedIndex = -1;
+	        	
+	        	txtID.disabled = true;
+	        	txtDescricao.disabled = false;
+	        	txtMarca.disabled = false;
+	        	txtValor.disabled = false;
+	        	// selectFaculdade.disabled = false;
+	        	
+	        	btnNovo.disabled = true;
+	        	btnSalvar.disabled = false;
+	        	btnApagar.disabled = true;
+	        	btnCancelar.disabled = false;
+	        }
+	        
+	        function salvarProduto() {
+	        	if (criandoNovoProduto) {
+	        		criarProduto();
+	        	}
+	        	else {
+	        		alterarProduto();
+	        	}
+	        }
+	        
+	        async function criarProduto() {
+	        	const URL = `/api/produtos`;
+	        	const dadosProduto = {
+	        		'descricao': txtDescricao.value,
+	        		'marca': txtMarca.value,
+	        		'valor': txtValor.value,
+	        	};
+	        	const postRequest = {
+	        		method: 'POST',
+	        		body: JSON.stringify(dadosProduto),
+	        		headers: { 'Content-type': 'application/json' }
+	        	};
+	        	fetch(URL, postRequest)
+	        		.then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta; } )
+	        		.then(resposta => resposta.json())
+	        		.then(jsonResponse => inicializar())
+	        		.catch(function(error) { paragrafoMensagem.innerHTML = 'Erro ao criar novo produt (código ' + error.message + ')'; } );
+	        }
+	        
+	        async function alterarProduto() {
+	        	const ID = txtID.value;
+	        	const URL = `/api/produtos/${ID}`;
+	        	const dadosProduto = {
+	        		'id': ID,
+	        		'descricao': txtDescricao.value,
+	        		'marca': txtMarca.value,
+	        		'valor': txtValor.value,
+	        	};
+	        	const putRequest = {
+	        		method: 'PUT',
+	        		body: JSON.stringify(dadosProduto),
+	        		headers: { 'Content-type': 'application/json' }
+	        	};
+	        	fetch(URL, putRequest)
+	        		.then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta; } )
+	        		.then(resposta => resposta.json())
+	        		.then(jsonResponse => inicializar())
+	        		.catch(function(error) { paragrafoMensagem.innerHTML = 'Erro ao alterar produto (código ' + error.message + ')'; } );	        	
+	        }
+	        
+	        function cancelarEdicao() {
+	        	inicializar();
+	        }
+	        
+	        async function apagarProduto() {
+	        	const ID = txtID.value;
+	        	const URL = `/api/produtos/${ID}`;
+	        	const deleteRequest = {
+	        		method: 'DELETE'
+	        	};
+	        	fetch(URL, deleteRequest)
+	        		.then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta; } )
+	        		.then(resposta => inicializar())
+	        		.catch(function(error) { paragrafoMensagem.innerHTML = 'Erro ao apagar produto (código ' + error.message + ')'; } );	        		
+	        }
+	        
+	    </script>    
+    </body>
+</html>
