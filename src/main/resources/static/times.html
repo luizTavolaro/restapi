@@ -27,7 +27,7 @@
 		<p style="font-weight:bold" id="paragrafoMensagem"></p>
 		
         <table>    
-            <tr> <th>ID</th> <th>Nome</th> <th>Ano Fundação</th> <th>Cidade</th> <th>Estado</th> </tr>
+            <tr> <th>ID</th> <th>Ano Fundação</th>  <th>Nome</th>  <th>Cidade</th> <th>Estado</th> </tr>
             <tbody id="corpoTabelaProdutos"> </tbody>
         </table>
         
@@ -88,12 +88,12 @@
 	            for (var i = 0; i < n; i++) {
 	                var t = times[i];
 	                linhasTabela += 
-	                	`<tr><td><a href="javascript:void(0)" onclick="selecionarTime('${t.id}','${t.anofundacao}','${t.nome}','${t.cidade}','${t.estado}')">` 
-	                    + p.id     + '</a></td>' + 
-	                    '<td>' + p.anofundacao   + '</td>' +
-	                    '<td>' + p.nome   + '</td>' +
-						'<td>' + p.cidade   + '</td>' +
-	                    '<td>' + p.estado   + '</td></tr>\n';
+	                	`<tr><td><a href="javascript:void(0)" onclick="selecionarTime('${t.id}','${t.anoFundacao}','${t.nome}','${t.cidade}','${t.estado}')">` 
+	                    + t.id     + '</a></td>' + 
+	                    '<td>' + t.anoFundacao   + '</td>' +
+	                    '<td>' + t.nome   + '</td>' +
+						'<td>' + t.cidade   + '</td>' +
+	                    '<td>' + t.estado   + '</td></tr>\n';
 	            }
 	            corpoTabela.innerHTML = linhasTabela;
 	        }
@@ -117,13 +117,13 @@
 	        // 	selectFaculdade.innerHTML = opcoes;
 	        // }
 	        
-	        function selecionarTime(id, anofundacao, nome, cidade, estado) {
+	        function selecionarTime(id, anoFundacao, nome, cidade, estado) {
 	        	criandoNovoTime = false;
 	        	// carregarFaculdades();
 	        	
 	            paragrafoMensagem.innerHTML = 'Altere e salve os dados do produto, ou então apague o registro do produto.'
 	            txtID.value = id;
-	            txtAnoFundacao.value = anofundacao;
+	            txtAnoFundacao.value = anoFundacao;
 	            txtNome.value = nome;
 				txtCidade.value = cidade;
 	            txtEstado.value = estado;
@@ -180,7 +180,7 @@
 	        async function criarTime() {
 	        	const URL = `/api/times`;
 	        	const dadosTime = {
-	        		'anofundacao': txtAnoFundacao.value,
+	        		'anoFundacao': txtAnoFundacao.value,
 					'nome': txtNome.value,
 	        		'cidade': txtCidade.value,
 	        		'estado': txtEstado.value,
@@ -202,7 +202,7 @@
 	        	const URL = `/api/times/${ID}`;
 	        	const dadosTime = {
 	        		'id': ID,
-	        		'anofundacao': txtAnoFundacao.value,
+	        		'anoFundacao': txtAnoFundacao.value,
 					'nome': txtNome.value,
 	        		'cidade': txtCidade.value,
 	        		'estado': txtEstado.value,
